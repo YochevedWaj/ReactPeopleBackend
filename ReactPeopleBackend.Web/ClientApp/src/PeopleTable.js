@@ -51,8 +51,10 @@ class PeopleTable extends React.Component {
     }
 
     onUpdateClick = () => {
-        axios.post('/api/people/editperson', this.state.person).then(this.loadPeople);
-        this.onCancelClick();
+        axios.post('/api/people/editperson', this.state.person).then(() => {
+            this.loadPeople();
+            this.onCancelClick();
+        });
     }
 
     onCancelClick = () => {
