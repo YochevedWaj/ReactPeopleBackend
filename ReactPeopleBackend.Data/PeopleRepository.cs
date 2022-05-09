@@ -31,6 +31,15 @@ namespace ReactPeopleBackend.Data
             context.Database.ExecuteSqlInterpolated($"DELETE FROM People WHERE ID = {id}");
         }
 
+        public void DeleteMany(List<int> ids)
+        {
+            using var context = new PeopleDataContext(_connectionString);
+            foreach(var id in ids)
+            {
+                context.Database.ExecuteSqlInterpolated($"DELETE FROM People WHERE ID = {id}"); 
+            }
+            
+        }
         public void EditPerson(Person person)
         {
             using var context = new PeopleDataContext(_connectionString);

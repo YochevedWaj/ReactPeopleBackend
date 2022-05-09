@@ -52,6 +52,14 @@ namespace ReactPeopleBackend.Web.Controllers
             var repo = new PeopleRepository(_connectionString);
             repo.EditPerson(person);
         }
+
+        [Route("deletemany")]
+        [HttpPost]
+        public void DeleteMany(List<int> checkedPeople)
+        {
+            var repo = new PeopleRepository(_connectionString);
+            repo.DeleteMany(checkedPeople);
+        }
     }
 
     public class IdObj

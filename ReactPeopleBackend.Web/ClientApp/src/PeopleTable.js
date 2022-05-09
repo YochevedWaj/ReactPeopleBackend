@@ -6,11 +6,11 @@ import PersonRow from './PersonRow';
 class PeopleTable extends React.Component {
     state = {
         people: [],
+        checkedPeople: [],
         person: {
             firstName: '',
             lastName: '',
-            age: '',
-            id: ''
+            age: ''
         },
         isEditing: false
     }
@@ -28,8 +28,8 @@ class PeopleTable extends React.Component {
         });
     }
 
-    componentDidMount() {
-        axios.get('/api/people/getall').then(this.loadPeople);
+    componentDidMount = () => {
+        this.loadPeople();
     }
 
     onTextChange = e => {
@@ -50,8 +50,8 @@ class PeopleTable extends React.Component {
         axios.post('/api/people/deleteperson', { id }).then(this.loadPeople);
     }
 
-    onUpdateClick = p => {
-        axios.post('/api/people/editperson', p).then(this.loadPeople);
+    onUpdateClick = () => {
+        axios.post('/api/people/editperson', this.state.person).then(this.loadPeople);
         this.onCancelClick();
     }
 
@@ -59,23 +59,63 @@ class PeopleTable extends React.Component {
         this.setState({ person: { firstName: '', lastName: '', age: '' },  isEditing: false })
     }
 
+    onCheck = id => {
+        const checkedPeople = this.state.checkedPeople;
+        const copy = [...checkedPeople, id];
+        this.setState({ checkedPeople: copy });
+        console.log(copy);
+    }
+
+    onUncheck = i => {
+        const checkedPeople = this.state.checkedPeople;
+        const copy = checkedPeople.filter(id => id !== i);
+        this.setState({ checkedPeople: copy });
+    }
+
+    onCheckBoxChange = id => {
+        if (this.state.checkedPeople.includes(id)) {
+            this.onUncheck(id);
+        } else {
+            this.onCheck(id);
+        }
+    }
+
+    onCheckAll = () => {
+        const { people } = this.state;
+        this.setState({ checkedPeople: people.map(p => p.id) });
+    }
+
+    onUncheckAll = () => {
+        this.setState({ checkedPeople: []});
+    }
+
+    onDeleteAllClick = () => {
+        axios.post('/api/people/deletemany', this.state.checkedPeople).then(this.loadPeople);
+        this.setState({ checkedPeople: [] });
+    }
+
+    allChecked = () => {
+        const { people, checkedPeople } = this.state;
+        return people.every(p => checkedPeople.includes(p.id));
+    }
     render() {
-        const { person, people, isEditing } = this.state;
+        const { person, people, isEditing, checkedPeople } = this.state;
         return (
             <div className='container mt-5'>
                 <AddPersonForm
                     person={person}
                     onTextChange={this.onTextChange}
-                    onAddUpdateClick={isEditing ? () => this.onUpdateClick(person) : this.onAddClick}
+                    onAddUpdateClick={isEditing ? this.onUpdateClick : this.onAddClick}
                     isEditing={isEditing}
                     onCancelClick={this.onCancelClick}/>
                 <table className='table table-hover table-bordered table-striped'>
                     <thead>
                         <tr>
                             <td style={{ width: 15 }}>
-                                <button className='btn btn-danger btn-block'>Delete</button>
-                                <button className='btn btn-info btn-block'>Check all</button>
-                                <button className='btn btn-info btn-block'>Uncheck all</button>
+                                <button onClick={this.onDeleteAllClick} className='btn btn-danger btn-block'>Delete</button>
+                                <div className='mt-2'>
+                                    <input type='checkbox' checked={this.allChecked()} onChange={this.allChecked() ? this.onUncheckAll : this.onCheckAll} className='form-control'></input>
+                                </div>
                             </td>
                             <td>First Name</td>
                             <td>Last Name</td>
@@ -89,6 +129,8 @@ class PeopleTable extends React.Component {
                             key={p.id}
                             onEditClick={() => this.onEditClick(p)}
                             onDeleteClick={() => this.onDeleteClick(p.id)}
+                            onCheckBoxChange={() => this.onCheckBoxChange(p.id)}
+                            isChecked={checkedPeople.includes(p.id)}
                         />)}
                     </tbody>
                 </table>
