@@ -92,8 +92,11 @@ class PeopleTable extends React.Component {
     }
 
     onDeleteAllClick = () => {
-        axios.post('/api/people/deletemany', this.state.checkedPeople).then(this.loadPeople);
-        this.setState({ checkedPeople: [] });
+        axios.post('/api/people/deletemany', this.state.checkedPeople).then(() => {
+            this.loadPeople();
+            this.setState({ checkedPeople: [] });
+        });
+
     }
 
     allChecked = () => {
